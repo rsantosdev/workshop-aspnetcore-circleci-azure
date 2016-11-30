@@ -21,6 +21,7 @@
         }
     },
     "buildOptions": {
+        "debugType": "portable",
         "copyToOutput": {
             "include": [
                 "xunit.runner.json",
