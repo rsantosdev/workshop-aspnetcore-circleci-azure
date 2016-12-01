@@ -164,7 +164,7 @@ namespace UnitTest
                 Twitter = "borgeston"
             };
 
-            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id+1000}", new StringContent(JsonConvert.SerializeObject(retonoInclusao), Encoding.UTF8, "application/json"));            
+            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id+1000}", new StringContent(JsonConvert.SerializeObject(pessoaEditada), Encoding.UTF8, "application/json"));            
             response.EnsureSuccessStatusCode();
 
             Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
