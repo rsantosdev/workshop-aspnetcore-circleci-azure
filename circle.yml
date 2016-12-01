@@ -1,0 +1,26 @@
+machine:
+  services:
+    - docker
+  post:
+    - sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+    - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
+    - sudo apt-get update
+    - sudo apt-get install dotnet-dev-1.0.0-preview2.1-003177
+
+dependencies:
+  override:
+    - dotnet restore
+
+databases:
+  override:
+    - docker run -d -p 1433:1433 -e SA_PASSWORD=adapter@2015 -e ACCEPT_EULA=Y --name mssql microsoft/mssql-server-linux
+    - docker inspect mssql
+
+test:
+  pre:
+    - dotnet build test/UnitTest/project.json 
+  override:
+    - dotnet test test/UnitTest/project.json
+  post:
+    - dotnet publish --configuration Release src/WebAPIApplication/project.json
+    - cp -R src/WebAPIApplication/bin/Release/netcoreapp1.1/ $CIRCLE_ARTIFACTS/
