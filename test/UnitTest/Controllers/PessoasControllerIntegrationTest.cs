@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WebAPIApplication;
@@ -45,6 +47,25 @@ namespace UnitTest
 
             Assert.Equal(data.Count, 1);
             Assert.Contains(data, x => x.Nome == pessoa.Nome);
+        }
+
+        [Fact]
+        public async Task DeveCriarUmaPessoa()
+        {
+            var pessoa = new Pessoa
+            {
+                Nome = "Weverton Gomes",
+                Twitter = "wevertongomes"
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(pessoa), Encoding.UTF8, "application/json");
+            var response = await Client.PostAsync(BaseUrl, content);
+            response.EnsureSuccessStatusCode();
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<Pessoa>(responseString);
+
+            Assert.Equal(pessoa.Nome, data.Nome);
         }
     }
 }
