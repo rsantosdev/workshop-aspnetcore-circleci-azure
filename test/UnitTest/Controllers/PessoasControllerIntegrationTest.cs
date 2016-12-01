@@ -147,24 +147,45 @@ namespace UnitTest
 
         [Fact]
         public async Task DeveRetornaNaoEncontraoParaAtualizarPessoaComIdInvalido()
-        {
-            var pessoa = new Pessoa
-            {
-                Nome = "Washington Borges",
-                Twitter = "borgeston"
-            };
-
-            await TestDataContext.AddAsync(pessoa);
-            await TestDataContext.SaveChangesAsync();
-           
-           var pessoaEditada = new Pessoa
+        {          
+           var pessoa = new Pessoa
            { 
-                Id = pessoa.Id,
+                Id = 0,
                 Nome = "Ton Borges",
                 Twitter = "borgeston"
             };
 
-            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id+1000}", new StringContent(JsonConvert.SerializeObject(pessoaEditada), Encoding.UTF8, "application/json"));
+            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id}", new StringContent(JsonConvert.SerializeObject(pessoa), Encoding.UTF8, "application/json"));
+
+            Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
+        }
+
+         [Fact]
+        public async Task DeveRetornaNaoEncontraoParaDeletarPessoaComIdInvalido()
+        {
+            var pessoa = new Pessoa
+            { 
+                Id = 0,
+                Nome = "Ton Borges",
+                Twitter = "borgeston"
+            };
+
+            var response = await Client.DeleteAsync($"{BaseUrl}/{pessoa.Id}");
+            
+            Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
+        }
+
+         [Fact]
+        public async Task DeveRetornaNaoEncontraoParaObterPessoaComIdInvalido()
+        {
+            var pessoa = new Pessoa
+            { 
+                Id = 0,
+                Nome = "Ton Borges",
+                Twitter = "borgeston"
+            };
+
+            var response = await Client.GetAsync($"{BaseUrl}/{pessoa.Id}");
 
             Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
         }
