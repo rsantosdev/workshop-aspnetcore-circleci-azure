@@ -5,6 +5,7 @@ using WebAPIApplication;
 using Xunit;
 using System.Net.Http;
 using System.Text;
+using System.Net;
 
 namespace UnitTest
 {
@@ -72,26 +73,28 @@ namespace UnitTest
         {
             var pessoa = new Pessoa
             {
-                Nome = "Rafael dos Santos",
-                Twitter = "rsantosdev"
+                Nome = "Washington Borges",
+                Twitter = "borgeston"
             };
 
-            var response = await Client.PostAsync(BaseUrl, new StringContent(JsonConvert.SerializeObject(pessoa), Encoding.UTF8, "application/json"));            
+            await TestDataContext.AddAsync(pessoa);
+            await TestDataContext.SaveChangesAsync();
+           
+           var pessoaEditada = new Pessoa
+           { 
+                Id = pessoa.Id,
+                Nome = "Ton Borges",
+                Twitter = "borgeston"
+            };
+
+            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id}", new StringContent(JsonConvert.SerializeObject(retonoInclusao), Encoding.UTF8, "application/json"));            
             response.EnsureSuccessStatusCode();
 
             var responseString = await response.Content.ReadAsStringAsync();
-            var retonoInclusao = JsonConvert.DeserializeObject<Pessoa>(responseString);
-            
-            retonoInclusao.Nome = "Ton Borges";
-            retonoInclusao.Twitter = "borgeston";
-
-            response = await Client.PutAsync(BaseUrl, new StringContent(JsonConvert.SerializeObject(retonoInclusao), Encoding.UTF8, "application/json"));            
-            response.EnsureSuccessStatusCode();
-
-            responseString = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<Pessoa>(responseString);
 
-            Assert.Equal(data.Nome, retonoInclusao.Nome);
+            Assert.Equal(data.Nome, pessoaEditada.Nome);
+            Assert.Equal(data.Twitter, pessoaEditada.Twitter);
         }
 
         [Fact]
@@ -116,6 +119,55 @@ namespace UnitTest
             var data = JsonConvert.DeserializeObject<List<Pessoa>>(responseString);
 
             Assert.Equal(data.Count, 0);
+        }
+
+        
+        [Fact]
+        public async Task DeveObterPessoa()
+        {
+            var pessoa = new Pessoa
+            {
+                Nome = "Washington Borges",
+                Twitter = "borgeston"
+            };
+
+            await TestDataContext.AddAsync(pessoa);
+            await TestDataContext.SaveChangesAsync();
+
+            var response = await Client.GetAsync($"{BaseUrl}/{pessoa.Id}");
+            response.EnsureSuccessStatusCode();
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<Pessoa>(responseString);
+
+            Assert.Equal(data.Id, pessoa.Id);
+            Assert.Equal(data.Nome, pessoa.Nome);
+            Assert.Equal(data.Twitter, pessoa.Twitter);
+        }
+
+        [Fact]
+        public async Task DeveRetornaNaoEncontraoParaAtualizarPessoaComIdInvalido()
+        {
+            var pessoa = new Pessoa
+            {
+                Nome = "Washington Borges",
+                Twitter = "borgeston"
+            };
+
+            await TestDataContext.AddAsync(pessoa);
+            await TestDataContext.SaveChangesAsync();
+           
+           var pessoaEditada = new Pessoa
+           { 
+                Id = pessoa.Id,
+                Nome = "Ton Borges",
+                Twitter = "borgeston"
+            };
+
+            var response = await Client.PutAsync($"{BaseUrl}/{pessoa.Id+1000}", new StringContent(JsonConvert.SerializeObject(retonoInclusao), Encoding.UTF8, "application/json"));            
+            response.EnsureSuccessStatusCode();
+
+            Assert.Equal(response.StatusCode, HttpStatusCode.NotFound);
         }
     }
 }

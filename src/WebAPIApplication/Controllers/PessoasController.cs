@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Net;
 
 namespace WebAPIApplication
 {
@@ -30,11 +31,25 @@ namespace WebAPIApplication
 
             return Json(modelo);
         }
-
-        [HttpPut]
-        public async Task<IActionResult> AtualizaPessoa([FromBody]Pessoa modelo)        
+        
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ObterPessoa(int id)        
         {
-            var pessoa = await  _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == modelo.Id);    
+            var pessoa = await  _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == id);    
+            
+            if(pessoa == null)
+                return NotFound();
+
+            return Json(pessoa);
+        }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizaPessoa(int id, [FromBody]Pessoa modelo)        
+        {
+            var pessoa = await  _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == id);    
+            
+            if(pessoa == null)
+                return NotFound();
 
             pessoa.Nome = modelo.Nome;
             pessoa.Twitter = modelo.Twitter;
@@ -45,11 +60,18 @@ namespace WebAPIApplication
         }
 
         [HttpDelete("{id}")]
-        public async Task RemovePessoa(int id)        
+        public async Task<IActionResult> RemovePessoa(int id)        
         {
             var pessoa = await _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == id);
+
+            if(pessoa == null)
+                return NotFound();
+
             _dataContext.Pessoas.Remove(pessoa);
+
             await _dataContext.SaveChangesAsync();
+
+            return StatusCode((int)HttpStatusCode.OK);
         }
     }
 }
