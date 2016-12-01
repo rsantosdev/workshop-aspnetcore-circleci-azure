@@ -1,6 +1,8 @@
 machine:
   services:
     - docker
+  environment:
+    ConnectionStrings__DefaultConnection: "Server=localhost;Database=WorkshopAspCore_Test;User Id=sa;Password=Workshop@123;MultipleActiveResultSets=true"
   post:
     - sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
     - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
