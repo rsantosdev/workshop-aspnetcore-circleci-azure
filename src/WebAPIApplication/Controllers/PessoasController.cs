@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace WebAPIApplication
 {
@@ -28,6 +29,27 @@ namespace WebAPIApplication
             await _dataContext.SaveChangesAsync();
 
             return Json(modelo);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> AtualizaPessoa([FromBody]Pessoa modelo)        
+        {
+            var pessoa = await  _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == modelo.Id);    
+
+            pessoa.Nome = modelo.Nome;
+            pessoa.Twitter = modelo.Twitter;
+
+            await _dataContext.SaveChangesAsync();
+
+            return Json(pessoa);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task RemovePessoa(int id)        
+        {
+            var pessoa = await _dataContext.Pessoas.SingleOrDefaultAsync(x=> x.Id == id);
+            _dataContext.Pessoas.Remove(pessoa);
+            await _dataContext.SaveChangesAsync();
         }
     }
 }
