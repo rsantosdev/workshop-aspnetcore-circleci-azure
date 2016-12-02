@@ -26,3 +26,12 @@ test:
   post:
     - dotnet publish --configuration Release src/WebAPIApplication/project.json
     - cp -R src/WebAPIApplication/bin/Release/netcoreapp1.1/ $CIRCLE_ARTIFACTS/
+
+deployment:
+  master:
+    branch: master
+    commands:
+      - docker build -t workshop-aspnetcore-circleci-azure .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - docker tag workshop-aspnetcore-circleci-azure $DOCKER_USER/workshop-aspnetcore-circleci-azure:latest
+      - docker push $DOCKER_USER/workshop-aspnetcore-circleci-azure
